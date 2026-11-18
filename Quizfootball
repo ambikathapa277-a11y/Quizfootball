@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOOTBALL QUIZ</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #080d18;
+  color: white;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 650px;
+  margin: 35px auto;
+  background: #111a2b;
+  padding: 25px;
+  border-radius: 18px;
+  border: 1px solid #263650;
+}
+
+h1 {
+  text-align: center;
+  color: #35e889;
+  font-size: 30px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #aab6c9;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 25px 0;
+}
+
+.stat {
+  background: #1c2940;
+  padding: 13px;
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+}
+
+.stat span {
+  display: block;
+  color: #35e889;
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.progress-bg {
+  background: #263650;
+  height: 9px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.progress {
+  height: 100%;
+  width: 0%;
+  background: #35e889;
+  transition: width .3s;
+}
+
+#question {
+  font-size: 21px;
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.option {
+  width: 100%;
+  padding: 16px;
+  margin: 8px 0;
+  border: 1px solid #34445f;
+  background: #1b2940;
+  color: white;
+  border-radius: 10px;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.option:hover:not(:disabled) {
+  border-color: #35e889;
+  background: #263c50;
+}
+
+.option:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.correct {
+  background: #12683f !important;
+  border-color: #35e889;
+}
+
+.wrong {
+  background: #7b2835 !important;
+  border-color: #ff6677;
+}
+
+#feedback {
+  text-align: center;
+  margin: 15px 0;
+  font-weight: bold;
+  min-height: 24px;
+}
+
+.next, .restart {
+  width: 100%;
+  padding: 15px;
+  background: #35e889;
+  color: #07130c;
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.hidden {
+  display: none;
+}
+
+#result {
+  text-align: center;
+  padding: 25px 0;
+}
+
+.final-score {
+  font-size: 48px;
+  color: #35e889;
+  font-weight: bold;
+}
+
+@media(max-width:480px) {
+  .container {
+    padding: 18px;
+    margin: 10px auto;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
+
+  #question {
+    font-size: 19px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>⚽ FOOTBALL QUIZ</h1>
+<p class="subtitle">Test your football knowledge!</p>
+
+<div class="stats">
+  <div class="stat">
+    Question
+    <span id="number">1/50</span>
+  </div>
+  <div class="stat">
+    Score
+    <span id="score">0</span>
+  </div>
+  <div class="stat">
+    Points
+    <span>+5</span>
+  </div>
+</div>
+
+<div class="progress-bg">
+  <div class="progress" id="progress"></div>
+</div>
+
+<div id="quiz">
+  <h2 id="question"></h2>
+  <div id="options"></div>
+  <p id="feedback"></p>
+  <button class="next hidden" id="next" onclick="nextQuestion()">
+    NEXT QUESTION →
+  </button>
+</div>
+
+<div id="result" class="hidden">
+  <h2>🏆 QUIZ COMPLETED!</h2>
+  <p>Your final score:</p>
+  <div class="final-score" id="finalScore">0/250</div>
+  <p id="message"></p>
+  <button class="restart" onclick="restartQuiz()">
+    PLAY AGAIN
+  </button>
+</div>
+
+</div>
+
+<script>
+
+const questions = [
+{
+q:"Which country won the 2022 FIFA World Cup?",
+o:["France","Argentina","Brazil","Germany"],a:1
+},
+{
+q:"Who has won the most Ballon d'Or awards?",
+o:["Cristiano Ronaldo","Neymar","Lionel Messi","Ronaldinho"],a:2
+},
+{
+q:"Which club is known as the Red Devils?",
+o:["Liverpool","Manchester United","Arsenal","Chelsea"],a:1
+},
+{
+q:"Where was the 2018 FIFA World Cup held?",
+o:["Brazil","Germany","Russia","Qatar"],a:2
+},
+{
+q:"Which country has won the most men's FIFA World Cups?",
+o:["Germany","Italy","Argentina","Brazil"],a:3
+},
+{
+q:"Which club plays at the Santiago Bernabéu?",
+o:["Barcelona","Real Madrid","Atletico Madrid","Sevilla"],a:1
+},
+{
+q:"Who is known as CR7?",
+o:["Cristiano Ronaldo","Carlos Tevez","Kylian Mbappe","Ronaldo Nazario"],a:0
+},
+{
+q:"Which country is Lionel Messi from?",
+o:["Spain","Brazil","Argentina","Portugal"],a:2
+},
+{
+q:"How many players does one team have on the pitch at the start of a standard football match?",
+o:["9","10","11","12"],a:2
+},
+{
+q:"Which club won the 2023 UEFA Champions League?",
+o:["Real Madrid","Manchester City","Inter Milan","Bayern Munich"],a:1
+},
+{
+q:"Which country won Euro 2020?",
+o:["England","France","Italy","Spain"],a:2
+},
+{
+q:"Which club is known as The Gunners?",
+o:["Chelsea","Arsenal","Tottenham","Everton"],a:1
+},
+{
+q:"Who won the 2014 FIFA World Cup?",
+o:["Brazil","Argentina","Germany","Spain"],a:2
+},
+{
+q:"Which player is famous for the Hand of God goal?",
+o:["Pele","Diego Maradona","Messi","Ronaldo"],a:1
+},
+{
+q:"What is the home stadium of FC Barcelona?",
+o:["Camp Nou","Anfield","Old Trafford","Emirates"],a:0
+},
+{
+q:"Which country does Neymar represent?",
+o:["Argentina","Portugal","Brazil","France"],a:2
+},
+{
+q:"Which English club plays at Anfield?",
+o:["Manchester City","Liverpool","Arsenal","Chelsea"],a:1
+},
+{
+q:"Which country won the 2010 FIFA World Cup?",
+o:["Netherlands","Germany","Spain","Italy"],a:2
+},
+{
+q:"Who is known as the Egyptian King?",
+o:["Mohamed Salah","Sadio Mane","Riyad Mahrez","Achraf Hakimi"],a:0
+},
+{
+q:"Which club has the nickname The Old Lady?",
+o:["AC Milan","Juventus","Inter Milan","Roma"],a:1
+},
+{
+q:"Which country hosted the 2022 FIFA World Cup?",
+o:["UAE","Saudi Arabia","Qatar","Japan"],a:2
+},
+{
+q:"Which player scored a hat-trick in the 2022 World Cup final?",
+o:["Messi","Mbappe","Di Maria","Giroud"],a:1
+},
+{
+q:"What is the maximum standard length of a football match?",
+o:["80 minutes","90 minutes","100 minutes","120 minutes"],a:1
+},
+{
+q:"Which club is based in Munich?",
+o:["Borussia Dortmund","Bayern Munich","RB Leipzig","Bayer Leverkusen"],a:1
+},
+{
+q:"Which country won Euro 2016?",
+o:["France","Germany","Portugal","Spain"],a:2
+},
+{
+q:"Who is the all-time top scorer in men's international football?",
+o:["Lionel Messi","Cristiano Ronaldo","Ali Daei","Sunil Chhetri"],a:1
+},
+{
+q:"Which club won the 2005 Champions League final?",
+o:["AC Milan","Liverpool","Chelsea","Barcelona"],a:1
+},
+{
+q:"Which country is Kylian Mbappe from?",
+o:["Belgium","France","Germany","Portugal"],a:1
+},
+{
+q:"Which club is known as The Blues?",
+o:["Chelsea","Liverpool","Arsenal","Newcastle"],a:0
+},
+{
+q:"Which position usually wears gloves?",
+o:["Defender","Striker","Goalkeeper","Midfielder"],a:2
+},
+{
+q:"Which country won the 2006 FIFA World Cup?",
+o:["France","Brazil","Italy","Germany"],a:2
+},
+{
+q:"Which club has won the most UEFA Champions League titles?",
+o:["Barcelona","Real Madrid","Liverpool","AC Milan"],a:1
+},
+{
+q:"Which country does Erling Haaland represent?",
+o:["Sweden","Denmark","Norway","Finland"],a:2
+},
+{
+q:"Which club is based in Paris?",
+o:["Marseille","Lyon","PSG","Monaco"],a:2
+},
+{
+q:"What is the nickname of the Argentina national team?",
+o:["Selecao","La Albiceleste","Les Bleus","Azzurri"],a:1
+},
+{
+q:"Which player is nicknamed O Fenomeno?",
+o:["Ronaldo Nazario","Ronaldinho","Kaka","Rivaldo"],a:0
+},
+{
+q:"Which country won the 1998 FIFA World Cup?",
+o:["Brazil","France","Italy","Germany"],a:1
+},
+{
+q:"Which club plays at Old Trafford?",
+o:["Manchester United","Manchester City","Everton","Chelsea"],a:0
+},
+{
+q:"Which country is Luka Modric from?",
+o:["Serbia","Slovenia","Croatia","Bosnia"],a:2
+},
+{
+q:"Which competition is contested by European national teams?",
+o:["Champions League","Europa League","UEFA European Championship","Club World Cup"],a:2
+},
+{
+q:"Which country won the 2014 Champions League final?",
+o:["Atletico Madrid","Real Madrid","Bayern Munich","Chelsea"],a:1
+},
+{
+q:"What is awarded when a defender commits a direct-free-kick foul inside their own penalty area?",
+o:["Corner","Throw-in","Penalty kick","Goal kick"],a:2
+},
+{
+q:"Which club is nicknamed The Yellow Submarine?",
+o:["Valencia","Villarreal","Sevilla","Real Betis"],a:1
+},
+{
+q:"Which nation won the 2023 FIFA Women's World Cup?",
+o:["England","USA","Spain","Germany"],a:2
+},
+{
+q:"Which player is known for the bicycle kick goal against Juventus in 2018?",
+o:["Messi","Cristiano Ronaldo","Bale","Benzema"],a:1
+},
+{
+q:"Which country has the national team nickname Azzurri?",
+o:["Italy","France","Portugal","Brazil"],a:0
+},
+{
+q:"How many points does a team receive for a league win?",
+o:["1","2","3","4"],a:2
+},
+{
+q:"Which club is based in Dortmund?",
+o:["Bayern Munich","Borussia Dortmund","Schalke","Hamburg"],a:1
+},
+{
+q:"Which player won the 2022 FIFA World Cup Golden Ball?",
+o:["Mbappe","Messi","Modric","Griezmann"],a:1
+},
+{
+q:"Which country does Mohamed Salah represent?",
+o:["Morocco","Egypt","Algeria","Tunisia"],a:1
+}
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function showQuestion() {
+  answered = false;
+  document.getElementById("number").textContent =
+    (current + 1) + "/50";
+
+  document.getElementById("score").textContent = score;
+  document.getElementById("progress").style.width =
+    (current / 50 * 100) + "%";
+
+  document.getElementById("question").textContent =
+    (current + 1) + ". " + questions[current].q;
+
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("next").classList.add("hidden");
+
+  const options = document.getElementById("options");
+  options.innerHTML = "";
+
+  questions[current].o.forEach((option, index) => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.textContent = String.fromCharCode(65 + index) + ". " + option;
+    btn.onclick = () => selectAnswer(index, btn);
+    options.appendChild(btn);
+  });
+}
+
+function selectAnswer(index, selected) {
+  if (answered) return;
+  answered = true;
+
+  const correct = questions[current].a;
+  const buttons = document.querySelectorAll(".option");
+
+  buttons.forEach(btn => btn.disabled = true);
+
+  if (index === correct) {
+    score += 5;
+    selected.classList.add("correct");
+    document.getElementById("feedback").textContent =
+      "✅ Correct! +5 Points";
+  } else {
+    selected.classList.add("wrong");
+    buttons[correct].classList.add("correct");
+    document.getElementById("feedback").textContent =
+      "❌ Wrong! No points.";
+  }
+
+  document.getElementById("score").textContent = score;
+
+  document.getElementById("next").classList.remove("hidden");
+}
+
+function nextQuestion() {
+  current++;
+
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+function finishQuiz() {
+  document.getElementById("quiz").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+
+  document.getElementById("progress").style.width = "100%";
+  document.getElementById("finalScore").textContent =
+    score + "/250";
+
+  document.getElementById("message").textContent =
+    score >= 200 ? "🏆 Football Expert!" :
+    score >= 150 ? "🔥 Great Football Knowledge!" :
+    score >= 100 ? "⚽ Good Job! Keep Learning!" :
+    "Keep practicing, football fan!";
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+
+  document.getElementById("quiz").classList.remove("hidden");
+  document.getElementById("result").classList.add("hidden");
+
+  showQuestion();
+}
+
+showQuestion();
+
+</script>
+</body>
+</html>
